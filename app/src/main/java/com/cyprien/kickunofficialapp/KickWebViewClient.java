@@ -16,7 +16,7 @@ public class KickWebViewClient extends WebViewClient {
         else {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            KickActivity.getAppContext().startActivity(intent);
+            KickActivity.getKickActivity().getAppContext().startActivity(intent);
         }
         return true; // cancel the current loading url
     }

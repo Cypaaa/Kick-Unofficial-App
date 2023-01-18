@@ -12,7 +12,7 @@ public class KickNetworkManager {
 
     public static boolean isOnline() {
         try {
-            Context appContext = MainActivity.getAppContext();
+            Context appContext = KickActivity.getAppContext();
             connectivityManager = (ConnectivityManager)appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
             NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();

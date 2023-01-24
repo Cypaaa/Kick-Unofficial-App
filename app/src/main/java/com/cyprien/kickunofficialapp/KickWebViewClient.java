@@ -7,9 +7,11 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import java.util.Objects;
+
 
 public class KickWebViewClient extends WebViewClient {
-    private KickWebView KickWebView;
+    private final KickWebView KickWebView;
     public KickWebViewClient(KickWebView kickWebView) {
         this.KickWebView = kickWebView;
     }
@@ -19,13 +21,6 @@ public class KickWebViewClient extends WebViewClient {
             // Google login service, all its redirections
             KickEndpoint.GoogleAuth // .com .co.uk .fr .be ...
     };
-
-    /*
-    private final Dictionary JsInterfaceUrl = new Dictionary<String, Object>() {
-        "https://kick.com/auth/login": KickJsInterface.LoginPageJsInterface
-    };*/
-
-
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -41,9 +36,9 @@ public class KickWebViewClient extends WebViewClient {
 
     private void UrlLoader(WebView view, String url) {
         if (KickString.ArrayItemIsStartsOf(AllowedUrls, url)) {
-            if (url.startsWith(KickEndpoint.GoogleAuth) && this.KickWebView.getUserAgent() != this.KickWebView.getChromeUserAgent())
+            if (url.startsWith(KickEndpoint.GoogleAuth) && !Objects.equals(this.KickWebView.getUserAgent(), this.KickWebView.getChromeUserAgent()))
                 this.KickWebView.setChromeUserAgent();
-            else if (url.startsWith(KickEndpoint.KickBase) && this.KickWebView.getUserAgent() != this.KickWebView.getDefaultUserAgent())
+            else if (url.startsWith(KickEndpoint.KickBase) && !Objects.equals(this.KickWebView.getUserAgent(), this.KickWebView.getDefaultUserAgent()))
                 this.KickWebView.setDefaultUserAgent();
             view.loadUrl(url);
         } else {

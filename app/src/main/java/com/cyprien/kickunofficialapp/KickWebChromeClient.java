@@ -6,12 +6,23 @@ import android.webkit.WebView;
 import android.widget.FrameLayout;
 
 public class KickWebChromeClient extends WebChromeClient {
-    private WebView webView;
+    private boolean fullscreen;
+    private int width;
+    private int height;
+    private final WebView webView;
     private View view;
 
     public KickWebChromeClient(WebView webView) {
+
         this.webView = webView;
+        this.fullscreen = false;
+        this.width = 16;
+        this.height = 9;
     }
+
+    public int getWidth() { return this.width; }
+    public int getHeight() { return this.height; }
+    public boolean getFullscreen() { return this.fullscreen; }
 
     @Override
     public void onShowCustomView(View view, CustomViewCallback callback) {
@@ -23,6 +34,9 @@ public class KickWebChromeClient extends WebChromeClient {
         frameLayout.addView(this.view, new FrameLayout.LayoutParams(-1, -1));
         this.view.setVisibility(View.VISIBLE);
         KickActivity.getKickActivity().setLandscape();
+        this.fullscreen = true;
+        this.width = view.getWidth();
+        this.height = view.getHeight();
     }
 
     @Override
@@ -30,5 +44,6 @@ public class KickWebChromeClient extends WebChromeClient {
         this.webView.setVisibility(View.VISIBLE);
         this.view.setVisibility(View.GONE);
         KickActivity.getKickActivity().setPortrait();
+        this.fullscreen = false;
     }
 }

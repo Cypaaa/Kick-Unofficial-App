@@ -4,7 +4,6 @@ package com.cyprien.kickunofficialapp;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -12,9 +11,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class KickNetworkManager {
-    private static boolean connected = false;
 
     public static boolean isOnline() {
+        boolean connected = false;
         try {
             Context appContext = KickActivity.getKickActivity().getAppContext();
             ConnectivityManager connectivityManager = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);

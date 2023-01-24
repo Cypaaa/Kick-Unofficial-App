@@ -5,21 +5,23 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.util.Rational;
 import android.view.Window;
 import android.webkit.WebView;
 import android.widget.Toast;
 
 public class KickActivity extends AppCompatActivity {
     private static KickActivity KickActivity;
+    public static KickActivity getKickActivity() { return KickActivity; }
+
     private KickWebView KickWebView;
     private Bundle SavedInstanceState;
-
-    public static KickActivity getKickActivity() { return KickActivity; }
 
     public Bundle getSavedInstanceState() { return this.SavedInstanceState; }
     public Context getAppContext() { return this.getApplicationContext(); }
@@ -36,21 +38,17 @@ public class KickActivity extends AppCompatActivity {
         this.SavedInstanceState = savedInstanceState;
         setContentView(R.layout.activity_main);
 
-
         // check if we have access to internet
         if (!KickNetworkManager.isOnline()) {
             this.NoInternet(); // write a toast
             this.finishAffinity(); // exit the app
             return;
         }
-
+        // Checking if it's the first time the user opens the app
         this.IsFirstStart();
-
-
         // checking if the app is outdated
         new KickRequestGithubVersionTask().execute(KickEndpoint.GithubAppVersion);
-
-
+        // configure the WebView
         WebView webView = findViewById(R.id.kickwebviewelement);
         this.KickWebView = new KickWebView(webView);
     }
@@ -89,5 +87,21 @@ public class KickActivity extends AppCompatActivity {
         super.onRestoreInstanceState(oldState);
         this.SavedInstanceState = oldState;
         this.KickWebView.restoreState(oldState);
+    }
+
+    @Override
+    public void onUserLeaveHint() {
+        // if Fullscreen -> we already are looking at a stream
+        KickWebChromeClient kickWebChromeClient = this.KickWebView.getKickWebChromeClient();
+        if (kickWebChromeClient.getFullscreen()) {
+            PictureInPictureParams pipParams = new PictureInPictureParams.Builder()
+                    .setAspectRatio(new Rational(
+                            kickWebChromeClient.getWidth(),
+                            kickWebChromeClient.getHeight()
+                    )).build();
+            enterPictureInPictureMode(pipParams);
+        } else if (this.KickWebView.isUrlStream()) {
+            KickToast.Toast(this, KickStaticText.PiP, 1);
+        }
     }
 }

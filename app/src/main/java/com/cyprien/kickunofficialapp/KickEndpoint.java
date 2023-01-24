@@ -18,6 +18,9 @@ public final class KickEndpoint {
     private static final String KickAuth = KickBase + "auth/";
 
     // public
+    public static final String KickProfile = KickBase + "profile";
+    public static final String KickFollowing = KickBase + "following";
+    public static final String KickCategories = KickBase + "categories";
     public static final String KickLogin = KickAuth + "login";
     public static final String KickSignup = KickAuth + "signup";
 

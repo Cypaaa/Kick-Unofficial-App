@@ -1,10 +1,12 @@
 package com.cyprien.kickunofficialapp;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.os.Bundle;
@@ -14,11 +16,10 @@ import android.widget.Toast;
 
 public class KickActivity extends AppCompatActivity {
     private static KickActivity KickActivity;
+    private KickWebView KickWebView;
+    private Bundle SavedInstanceState;
 
     public static KickActivity getKickActivity() { return KickActivity; }
-
-    private KickWebView KickWebView; // for future devs
-    private Bundle SavedInstanceState;
 
     public Bundle getSavedInstanceState() { return this.SavedInstanceState; }
     public Context getAppContext() { return this.getApplicationContext(); }
@@ -36,11 +37,19 @@ public class KickActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
+        // check if we have access to internet
         if (!KickNetworkManager.isOnline()) {
             this.NoInternet(); // write a toast
             this.finishAffinity(); // exit the app
             return;
         }
+
+        this.IsFirstStart();
+
+
+        // checking if the app is outdated
+        new KickRequestGithubVersionTask().execute(KickEndpoint.GithubAppVersion);
+
 
         WebView webView = findViewById(R.id.kickwebviewelement);
         this.KickWebView = new KickWebView(webView);
@@ -48,7 +57,18 @@ public class KickActivity extends AppCompatActivity {
 
     // will make a KickCustomToast class in future updates
     public void NoInternet() {
-        KickToast.Toast(KickActivity.getAppContext(), "No Internet connection found.\nConnect to internet to use Kick.", Toast.LENGTH_LONG);
+        KickToast.Toast(KickActivity.getAppContext(), KickStaticText.NoInternet, Toast.LENGTH_LONG);
+    }
+
+    public void IsFirstStart() {
+        final String key = "firststart";
+        SharedPreferences settings = this.getSharedPreferences(this.getPackageName(), MODE_PRIVATE);
+        if(settings.getBoolean(key, true)) {
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putBoolean(key, false);
+            editor.apply();
+            KickToast.Toast(this, KickStaticText.FirstStart, 0);
+        }
     }
 
     // if i press back, i want my app to show the previous page
@@ -58,7 +78,7 @@ public class KickActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle newState) {
+    protected void onSaveInstanceState(@NonNull Bundle newState) {
         super.onSaveInstanceState(newState);
         this.SavedInstanceState = newState;
         this.KickWebView.saveState(newState);

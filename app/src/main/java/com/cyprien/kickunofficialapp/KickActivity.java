@@ -1,9 +1,6 @@
 package com.cyprien.kickunofficialapp;
 
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.app.PictureInPictureParams;
 import android.content.Context;
@@ -13,8 +10,14 @@ import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Rational;
 import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+// start foreground service to keep the sound on when the screen is sleeping
 
 public class KickActivity extends AppCompatActivity {
     private static KickActivity KickActivity;
@@ -37,6 +40,7 @@ public class KickActivity extends AppCompatActivity {
         KickActivity = this;
         this.SavedInstanceState = savedInstanceState;
         setContentView(R.layout.activity_main);
+        this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // check if we have access to internet
         if (!KickNetworkManager.isOnline()) {

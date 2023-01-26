@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Rational;
 import android.view.Window;
 import android.view.WindowManager;
@@ -97,15 +98,20 @@ public class KickActivity extends AppCompatActivity {
     public void onUserLeaveHint() {
         // if Fullscreen -> we already are looking at a stream
         KickWebChromeClient kickWebChromeClient = this.KickWebView.getKickWebChromeClient();
-        if (kickWebChromeClient.getFullscreen()) {
-            PictureInPictureParams pipParams = new PictureInPictureParams.Builder()
-                    .setAspectRatio(new Rational(
-                            kickWebChromeClient.getWidth(),
-                            kickWebChromeClient.getHeight()
-                    )).build();
-            enterPictureInPictureMode(pipParams);
-        } else if (this.KickWebView.isUrlStream()) {
+        Log.println(Log.INFO, "xxx", Boolean.valueOf(kickWebChromeClient.getFullscreen()).toString());
+        Log.println(Log.INFO, "xxx", Integer.valueOf(kickWebChromeClient.getWidth()).toString());
+        Log.println(Log.INFO, "xxx", Integer.valueOf(kickWebChromeClient.getHeight()).toString());
+        if (kickWebChromeClient.getFullscreen())
+            this.EnterPiP(kickWebChromeClient.getWidth(), kickWebChromeClient.getHeight());
+        else if (this.KickWebView.isUrlStream()) {
             KickToast.Toast(this, KickStaticText.PiP, 1);
         }
+    }
+
+    private void EnterPiP(int width, int height) {
+        PictureInPictureParams pipParams = new PictureInPictureParams.Builder()
+                .setAspectRatio(new Rational(width, height))
+                .build();
+        enterPictureInPictureMode(pipParams);
     }
 }

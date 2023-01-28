@@ -12,10 +12,10 @@ import java.net.URL;
 
 public class KickNetworkManager {
 
-    public static boolean isOnline() {
+    public static boolean isOnline(KickActivity kickActivity) {
         boolean connected = false;
         try {
-            Context appContext = KickActivity.getKickActivity().getAppContext();
+            Context appContext = kickActivity.getApplicationContext();
             ConnectivityManager connectivityManager = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
             NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();

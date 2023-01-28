@@ -1,8 +1,6 @@
 package com.cyprien.kickunofficialapp;
 
 
-import android.content.Intent;
-import android.net.Uri;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -12,7 +10,9 @@ import java.util.Objects;
 
 public class KickWebViewClient extends WebViewClient {
     private final KickWebView KickWebView;
-    public KickWebViewClient(KickWebView kickWebView) {
+    private KickActivity KickActivity;
+    public KickWebViewClient(KickActivity kickActivity, KickWebView kickWebView) {
+        this.KickActivity = kickActivity;
         this.KickWebView = kickWebView;
     }
     private final String[] AllowedUrls = new String[] {
@@ -40,11 +40,11 @@ public class KickWebViewClient extends WebViewClient {
                 this.KickWebView.setChromeUserAgent();
             else if (url.startsWith(KickEndpoint.KickBase) && !Objects.equals(this.KickWebView.getUserAgent(), this.KickWebView.getDefaultUserAgent()))
                 this.KickWebView.setDefaultUserAgent();
+            // stops current loading <- can cause login to bug ??
+            this.KickWebView.getKickWebView().stopLoading();
             view.loadUrl(url);
         } else {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            KickActivity.getKickActivity().getAppContext().startActivity(intent);
+            this.KickActivity.OpenUrl(url);
         }
     }
 }

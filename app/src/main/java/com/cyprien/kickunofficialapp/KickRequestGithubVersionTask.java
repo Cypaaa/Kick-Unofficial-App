@@ -1,8 +1,15 @@
 package com.cyprien.kickunofficialapp;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 
 class KickRequestGithubVersionTask extends AsyncTask<String, String, String> {
+    @SuppressLint("StaticFieldLeak")
+    private final KickActivity KickActivity;
+
+    public KickRequestGithubVersionTask(KickActivity kickActivity) {
+        this.KickActivity = kickActivity;
+    }
 
     @Override
     protected String doInBackground(String... uri) {
@@ -16,14 +23,12 @@ class KickRequestGithubVersionTask extends AsyncTask<String, String, String> {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         try {
-            double githubVersion = Double.parseDouble(result);
-            double appVersion = Double.parseDouble(BuildConfig.VERSION_NAME);
-            if (appVersion < githubVersion) {
-                KickToast.Toast(KickActivity.getKickActivity(), KickStaticText.Outdated, 1);
+            int githubVersion = Integer.parseInt(result);
+            if (BuildConfig.VERSION_CODE < githubVersion) {
+                KickToast.Toast(this.KickActivity, KickStaticText.Outdated, 1);
             }
         } catch(Exception e) {
             e.printStackTrace();
         }
-
     }
 }

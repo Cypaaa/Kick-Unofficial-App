@@ -3,14 +3,12 @@ package com.cyprien.kickunofficialapp;
 
 import android.annotation.SuppressLint;
 import android.app.PictureInPictureParams;
-import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.content.res.AssetManager;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Rational;
-import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -21,16 +19,10 @@ import androidx.appcompat.app.AppCompatActivity;
 // start foreground service to keep the sound on when the screen is sleeping
 
 public class KickActivity extends AppCompatActivity {
-    private static KickActivity KickActivity;
-    public static KickActivity getKickActivity() { return KickActivity; }
-
     private KickWebView KickWebView;
     private Bundle SavedInstanceState;
 
     public Bundle getSavedInstanceState() { return this.SavedInstanceState; }
-    public Context getAppContext() { return this.getApplicationContext(); }
-    public AssetManager getAppAssetManager() { return this.getAppAssetManager(); }
-    public Window getAppWindow() { return this.getWindow(); }
     public void setLandscape() { this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE); }
     @SuppressLint("SourceLockedOrientationActivity")
     public void setPortrait() { this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); }
@@ -38,29 +30,34 @@ public class KickActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        KickActivity = this;
         this.SavedInstanceState = savedInstanceState;
         setContentView(R.layout.activity_main);
+
+        // prevent screen from going to sleep
         this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // check if we have access to internet
-        if (!KickNetworkManager.isOnline()) {
-            this.NoInternet(); // write a toast
-            this.finishAffinity(); // exit the app
-            return;
-        }
+        this.CheckInternet();
         // Checking if it's the first time the user opens the app
         this.IsFirstStart();
-        // checking if the app is outdated
-        new KickRequestGithubVersionTask().execute(KickEndpoint.GithubAppVersion);
+
         // configure the WebView
         WebView webView = findViewById(R.id.kickwebviewelement);
-        this.KickWebView = new KickWebView(webView);
+        this.KickWebView = new KickWebView(this, webView);
+
+        // checking if the app is outdated
+        new KickRequestGithubVersionTask(this).execute(KickEndpoint.GithubAppVersion);
+
     }
 
     // will make a KickCustomToast class in future updates
-    public void NoInternet() {
-        KickToast.Toast(KickActivity.getAppContext(), KickStaticText.NoInternet, Toast.LENGTH_LONG);
+    public boolean CheckInternet() {
+        if (!KickNetworkManager.isOnline(this)) {
+            KickToast.Toast(this, KickStaticText.NoInternet, Toast.LENGTH_LONG);
+            this.finishAffinity(); // exit the app
+            return true;
+        }
+        return false;
     }
 
     public void IsFirstStart() {
@@ -72,6 +69,33 @@ public class KickActivity extends AppCompatActivity {
             editor.apply();
             KickToast.Toast(this, KickStaticText.FirstStart, 0);
         }
+    }
+
+    public void OpenUrl(String url) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.getApplicationContext().startActivity(intent);
+    }
+
+    /*
+    public void Test() {
+        FrameLayout frameLayout = (FrameLayout)this.getWindow().getDecorView();
+        View view = this.getWindow().getDecorView().getRootView();
+        WebView webView = this.KickWebView.getKickWebView();
+        webView.setVisibility(View.GONE);
+        //if(view != null)
+        //    frameLayout.removeView(view);
+        //frameLayout.addView(view, new FrameLayout.LayoutParams(-1, -1));
+        view.setVisibility(View.VISIBLE);
+        this.EnterPiP(16, 9);
+    }
+    */
+
+    private void EnterPiP(int width, int height) {
+        PictureInPictureParams pipParams = new PictureInPictureParams.Builder()
+                .setAspectRatio(new Rational(width, height))
+                .build();
+        enterPictureInPictureMode(pipParams);
     }
 
     // if i press back, i want my app to show the previous page
@@ -98,20 +122,11 @@ public class KickActivity extends AppCompatActivity {
     public void onUserLeaveHint() {
         // if Fullscreen -> we already are looking at a stream
         KickWebChromeClient kickWebChromeClient = this.KickWebView.getKickWebChromeClient();
-        Log.println(Log.INFO, "xxx", Boolean.valueOf(kickWebChromeClient.getFullscreen()).toString());
-        Log.println(Log.INFO, "xxx", Integer.valueOf(kickWebChromeClient.getWidth()).toString());
-        Log.println(Log.INFO, "xxx", Integer.valueOf(kickWebChromeClient.getHeight()).toString());
         if (kickWebChromeClient.getFullscreen())
             this.EnterPiP(kickWebChromeClient.getWidth(), kickWebChromeClient.getHeight());
         else if (this.KickWebView.isUrlStream()) {
+            //this.Test();
             KickToast.Toast(this, KickStaticText.PiP, 1);
         }
-    }
-
-    private void EnterPiP(int width, int height) {
-        PictureInPictureParams pipParams = new PictureInPictureParams.Builder()
-                .setAspectRatio(new Rational(width, height))
-                .build();
-        enterPictureInPictureMode(pipParams);
     }
 }

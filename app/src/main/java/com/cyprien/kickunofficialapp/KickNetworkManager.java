@@ -12,7 +12,7 @@ import java.net.URL;
 
 public class KickNetworkManager {
 
-    public static boolean isOnline(KickActivity kickActivity) {
+    public static boolean hasInternet(KickActivity kickActivity) {
         boolean connected = false;
         try {
             Context appContext = kickActivity.getApplicationContext();
@@ -26,7 +26,7 @@ public class KickNetworkManager {
         return connected;
     }
 
-    public static String getGithubVersion(String url) {
+    public static String fetchUrl(String url) {
         StringBuilder content = new StringBuilder();
         try {
             URL u = new URL(url);

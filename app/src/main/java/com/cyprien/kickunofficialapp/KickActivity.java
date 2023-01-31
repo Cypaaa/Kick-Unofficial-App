@@ -46,18 +46,35 @@ public class KickActivity extends AppCompatActivity {
         this.KickWebView = new KickWebView(this, webView);
 
         // checking if the app is outdated
-        new KickRequestGithubVersionTask(this).execute(KickEndpoint.GithubAppVersion);
+        this.CheckUpdate();
 
     }
 
     // will make a KickCustomToast class in future updates
-    public boolean CheckInternet() {
-        if (!KickNetworkManager.isOnline(this)) {
+    public void CheckInternet() {
+        if (!KickNetworkManager.hasInternet(this)) {
             KickToast.Toast(this, KickStaticText.NoInternet, Toast.LENGTH_LONG);
             this.finishAffinity(); // exit the app
-            return true;
         }
-        return false;
+    }
+
+    public void CheckUpdate() {
+        KickActivity self = this;
+        @SuppressLint("StaticFieldLeak")
+        KickFetchUrlTask task = new KickFetchUrlTask() {
+            @Override
+            public void Callback(String result) {
+                try {
+                    int githubVersion = Integer.parseInt(result);
+                    if (BuildConfig.VERSION_CODE < githubVersion) {
+                        KickToast.Toast(self, KickStaticText.Outdated, 1);
+                    }
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        task.execute(KickEndpoint.GithubAppVersion);
     }
 
     public void IsFirstStart() {
@@ -76,20 +93,6 @@ public class KickActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         this.getApplicationContext().startActivity(intent);
     }
-
-    /*
-    public void Test() {
-        FrameLayout frameLayout = (FrameLayout)this.getWindow().getDecorView();
-        View view = this.getWindow().getDecorView().getRootView();
-        WebView webView = this.KickWebView.getKickWebView();
-        webView.setVisibility(View.GONE);
-        //if(view != null)
-        //    frameLayout.removeView(view);
-        //frameLayout.addView(view, new FrameLayout.LayoutParams(-1, -1));
-        view.setVisibility(View.VISIBLE);
-        this.EnterPiP(16, 9);
-    }
-    */
 
     private void EnterPiP(int width, int height) {
         PictureInPictureParams pipParams = new PictureInPictureParams.Builder()
@@ -120,12 +123,11 @@ public class KickActivity extends AppCompatActivity {
 
     @Override
     public void onUserLeaveHint() {
-        // if Fullscreen -> we already are looking at a stream
+        // if Fullscreen -> we are already looking at a stream
         KickWebChromeClient kickWebChromeClient = this.KickWebView.getKickWebChromeClient();
         if (kickWebChromeClient.getFullscreen())
             this.EnterPiP(kickWebChromeClient.getWidth(), kickWebChromeClient.getHeight());
         else if (this.KickWebView.isUrlStream()) {
-            //this.Test();
             KickToast.Toast(this, KickStaticText.PiP, 1);
         }
     }

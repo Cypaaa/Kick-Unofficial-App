@@ -36,8 +36,6 @@ public class KickWebChromeClient extends WebChromeClient {
         this.view.setVisibility(View.VISIBLE);
         this.KickActivity.setLandscape();
         this.fullscreen = true;
-        //this.width = view.getWidth();
-        //this.height = view.getHeight();
     }
 
     @Override

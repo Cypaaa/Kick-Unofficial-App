@@ -22,6 +22,7 @@ public class KickWebViewClient extends WebViewClient {
             KickEndpoint.GoogleAuth // .com .co.uk .fr .be ...
     };
 
+    // just in case
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         this.UrlLoader(view, url);
@@ -36,15 +37,19 @@ public class KickWebViewClient extends WebViewClient {
 
     private void UrlLoader(WebView view, String url) {
         if (KickString.ArrayItemIsStartsOf(AllowedUrls, url)) {
-            if (url.startsWith(KickEndpoint.GoogleAuth) && !Objects.equals(this.KickWebView.getUserAgent(), this.KickWebView.getChromeUserAgent()))
-                this.KickWebView.setChromeUserAgent();
-            else if (url.startsWith(KickEndpoint.KickBase) && !Objects.equals(this.KickWebView.getUserAgent(), this.KickWebView.getDefaultUserAgent()))
-                this.KickWebView.setDefaultUserAgent();
+            this.setCustomUserAgent(url);
             // stops current loading <- can cause login to bug ??
             this.KickWebView.getKickWebView().stopLoading();
             view.loadUrl(url);
         } else {
             this.KickActivity.OpenUrl(url);
         }
+    }
+
+    private void setCustomUserAgent(String url) {
+        if (url.startsWith(KickEndpoint.GoogleAuth) && !Objects.equals(this.KickWebView.getUserAgent(), this.KickWebView.getChromeUserAgent()))
+            this.KickWebView.setChromeUserAgent();
+        else if (url.startsWith(KickEndpoint.KickBase) && !Objects.equals(this.KickWebView.getUserAgent(), this.KickWebView.getDefaultUserAgent()))
+            this.KickWebView.setDefaultUserAgent();
     }
 }
